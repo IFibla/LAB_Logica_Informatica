@@ -1,0 +1,3 @@
+/*
+Escribe un predicado simplifica que pueda usarse en combinacion con el programa de calcular derivadas.
+*/
