@@ -1,152 +1,166 @@
-% For the next Catalan Computer Science Olympiad, we want to make the best possible
-% team by selecting a set of students. For each student, we have the following information:
-%
-% 1.- Her ID
-% 2.- The list of other students which she considers friends. Note that S1 could consider S2
-%     as a friend, but the converse is not necessarily true.
-% 3.- The programming topic she is most expert on.
-%
-% The goal is to form a team with exactly K students such that each one of them considers all other team members a friend
-% and all chosen students haver different expertise topics.
-%
-% Complete the writeClauses part below to find out one possible team.
+symbolicOutput(0).  % set to 1 for debugging: to see symbolic output only; 0 otherwise.
 
 
-%%% input:
-numMembersTeam(6).
-numStudents(25).
-% info( id, list_of_students_(s)he_considers_a_friend, topic )
-info(1,[4,9,11,14,15,16,21,23,24],t6).
-info(2,[4,9,12,15,16,19,23],t8).
-info(3,[3,7,10,11,12,13,15,17,21,22,24],t3).
-info(4,[1,7,8,13,15,23,24],t4).
-info(5,[1,8,9,11,13,17,18,23,24],t6).
-info(6,[1,2,3,5,6,8,9,16,18,20,22,23,24],t6).
-info(7,[5,10,11,12,14,20,25],t3).
-info(8,[4,9,12,20,21],t1).
-info(9,[3,6,9,15,20,23,24],t8).
-info(10,[2,4,5,7,8,10,11,13,15,16,21,24],t8).
-info(11,[1,3,5,11,12,14,15,17,20,22,24],t2).
-info(12,[3,6,8,10,11,12,14,15,17,18,22],t5).
-info(13,[2,4,6,8,10,13,15,18,19,24,25],t4).
-info(14,[2,8,11,12,19],t4).
-info(15,[3,4,6,11,12,14,15,16,17,22],t6).
-info(16,[1,3,4,5,7,10,14,18,22,25],t3).
-info(17,[2,3,9,11,12,14,15,16,17,19,20,22],t4).
-info(18,[4,5,7,10,11,14,17,18,20,24],t8).
-info(19,[3,4,7,19,24],t4).
-info(20,[1,2,3,6,11,13,19],t8).
-info(21,[1,10,17,19,23,24,25],t8).
-info(22,[3,4,11,12,13,15,16,17,20,22],t1).
-info(23,[6,11,21,24],t4).
-info(24,[2,6,12,13,15,18,19,20,21,23,25],t7).
-info(25,[1,3,8,10,13,18,20,21,24],t3).
-%%% end input
+entrada([ [-,4,-,  -,-,-,  -,1,-],      %   Solution shown      6 4 3  9 7 5  2 1 8       
+          [-,-,8,  -,3,-,  9,-,-],      %      for this         2 7 8  4 3 1  9 5 6       
+          [-,-,-,  6,8,2,  -,-,-],      %   input example:      5 1 9  6 8 2  3 4 7       
+                                        %                 
+          [3,2,-,  -,6,-,  -,7,9],      %                       3 2 5  8 6 4  1 7 9       
+          [-,-,7,  -,-,-,  4,-,-],      %                       1 8 7  3 5 9  4 6 2       
+          [9,6,-,  -,1,-,  -,8,3],      %                       9 6 4  2 1 7  5 8 3       
+                                        %                                      
+          [-,-,-,  7,9,8,  -,-,-],      %                       4 5 2  7 9 8  6 3 1       
+          [-,-,1,  -,2,-,  7,-,-],      %                       8 3 1  5 2 6  7 9 4       
+          [-,9,-,  -,-,-,  -,2,-] ]).   %                       7 9 6  1 4 3  8 2 5       
+
+/*
+Nomes com a recordatori la crida between(A, B, C) es cert quan C es un enter entre els enters A i B. 
+Llavors, si executem between(1, 9, 2) el resultat sera true. D'altra banda, si executem 
+between(1, 9, 0) el resultat sera false.
+*/
+row(I) :- between(1, 9, I).
+col(J) :- between(1, 9, J).
+val(K) :- betweem(1, 9, K).
+
+blockID(Iid, Jid) :- 
+    member(Iid, [0, 1, 2]),
+    member(Jid, [0, 1, 2]).
+
+/*
+Aquesta funcio retorna les coordenades de totes les caseslles d'un block. Definirem com a block el
+quadrat de 3x3 caselles. Per exemple, si executem squareOfBlock(0, 1, I, J) ens retornara:
+    I = 1, J = 4 ;
+    I = 1, J = 5 ;
+    I = 1, J = 6 ;
+    I = 2, J = 4 ;
+    I = 2, J = 5 ;
+    I = 2, J = 6 ;
+    I = 3, J = 4 ;
+    I = 3, J = 5 ;
+    I = 3, J = 6 ;
+*/
+squareOfBlock(Iid, Jid, I, J) :-
+    row(I),
+    col(J),
+    Iid is (I-1) // 3,
+    Jid is (J-1) // 3.
 
 
-%Helpful prolog predicates:
-student(S) :- 
-    numStudents(N), 
-    between(1,N,S).
+%%%%%   1. SAT Variables:
 
-friends(S1,S2) :- 
-      student(S1),
-      student(S2),
-      info(S1,L,_),
-      member(S2,L).
-
-expertise(S,E) :- 
-      student(S), 
-      info(S,_,E).
-
-%%%%%%% =======================================================================================
-%
-% Our LI Prolog template for solving problems using a SAT solver.
-%
-% It generates the SAT clauses, calls the SAT solver, and shows the solution. Just specify:
-%       1. SAT Variables
-%       2. Clause generation
-%       3. DisplaySol: show the solution.
-%
-%%%%%%% =======================================================================================
-
-symbolicOutput(0).
-
-%%%%%%  1. SAT Variables:
-
-satVariable( chosen(S) ):- student(S).   % chosen(S) means "student S has been chosen"
+/*
+La clausula x(I, J, K) equival a dir "en la fila I, columna J, hi ha el valor K".
+Per tant, com que tenim 9^2 caselles, les quals poden tenir 9 valors diferents,
+es generaran un total de 9^3 = 729 SAT Variables. 
+*/
+satVariable( x(I, J, K) ) :-
+    row(I),
+    col(J),
+    val(K).
 
 
-%%%%%%  2. Clause generation for the SAT solver:
+%%%%%   2. Generacio de clausules per el SAT solver:
 
-exactlyKStudents :-
-      numMembersTeam(K),
-      findall(chosen(S), student(S), C),
-      exactly(K, C),
-      fail.
-exactlyKStudents.
+/*
+Nomes com a recordatori, el predicat nth1(A, B, C) significa el element "A-essim de la llista B es C."
+En el moment de generar les clausules, seguirem sempre la seguent estructura:
+    1.  Definim una clausula que finalitza amb el predicat fail.
+    2.  Definim una clausula buida.
+La clausula que es defineix a continuacio, generara les clausules que especificaran els valors 
+inicials del Sudoku. En aquest cas, podrem veure les seguents clausules:
+    x(1,2,4), x(1,8,1) ... x(9,2,9), x(9,8,2)
+*/
+filledInputValues :- 
+    entrada(Sudoku),
+    nth1(I, Sudoku, Row),
+    nth1(J, Row, K),
+    integer(K),
+    writeClause([x(I, J, K)]),
+    fail.
+filledInputValues.
+
+/*
+Nomes com a recordatori, el predicat findall(X, Cond, L) equival a dir "L = { X | Cond }". O en altres
+paraules, L equival a quantes vegades es compleix la condició Cond en el conjunt de dades X.
+En aquest cas, la clausula eachIJexactlyOneK defineix que només pot existir un unic valor per cada
+casella I, J.
+*/
+eachIJexactlyOneK :-
+    row(I),
+    col(J),
+    findall( x(I, J, K), val(K), Lits ),
+    exactly(1, Lits),
+    fail.
+eachIJexactlyOneK.
+
+eachIKexactlyOneJ :-
+    row(I),
+    val(K),
+    findall( x(I, J, K), col(J), Lits ),
+    exactly(1, Lits),
+    fail.
+eachIKexactlyOneJ.
+
+eachJKexactlyOneI :-
+    col(J),
+    val(K),
+    findall( x(I, J, K), row(I), Lits ),
+    exactly(1, Lits),
+    fail.
+eachJKexactlyOneI.
+
+eachBlockEachKexactlyOnce :-
+    blockID(Iid, Jid),
+    val(K),
+    findall( x(I, J, K), squareOfBlock(Iid, Jid, I, J), Lits),
+    exactly(1, Lits),
+    fail.
+eachBlockEachKexactlyOnce.
+
+writeClauses :-
+    filledInputValues,
+    eachIJexactlyOneK,
+    eachIKexactlyOneJ,
+    eachJKexactlyOneI,
+    eachBlockEachKexactlyOnce,
+    true,
+    !.
+writeClauses :-
+    told,
+    nl,
+    write('Function writeClauses failed!'),
+    nl,
+    nl, 
+    halt.
 
 
-friendsClause :-
-      student(S1),
-      student(S2),
-      S1 \= S2,
-      createFriendsClause(S1, S2),
-      fail.
-friendsClause.      
+%%%%%   3.  Display Solution. Variable M contains the literals that are true in the model.
 
-createFriendsClause(S1, S2) :-
-      not(friends(S1, S2)),
-      friends(S1, S2),
-      writeClause([-chosen(E1),-chosen(E2)]), 
-      fail.
+line(I) :-
+    member(I, [4, 7]),
+    nl,
+    !.
+line(_).
 
-createFriendsClause(S1, S2) :-
-      friends(S1, S2),
-      not(friends(S1, S2)),
-      writeClause([-chosen(E1),-chosen(E2)]), 
-      fail.
+space(J) :-
+    member(J, [4, 7]),
+    write(' '),
+    !.
+space(_).
 
-createFriendsClause(S1, S2) :-
-      not(friends(S1, S2)),
-      not(friends(S1, S2)),
-      writeClause([-chosen(E1),-chosen(E2)]), 
-      fail.
-createFriendsClause(_, _).
+displaySol(M) :-
+    nl,
+    row(I),
+    nl,
+    line(I),
+    col(J),
+    space(J),
+    member ( x(I, J, K), M), 
+    write(K),
+    write(' '),
+    fail.
+displaySol(_).
 
-notRepeateExpert :-
-      student(S),
-      expertise(S, E),
-      findall(chosen(T), (expertise(T, E), S \= T), C),
-      C \= [],
-      atMost(1, [chosen(S)|C]),
-      fail.
-notRepeateExpert.
-
-
-writeClauses:- 
-    exactlyKStudents,
-    friendsClause,
-    notRepeateExpert.
-writeClauses:- told, nl, write('writeClauses failed!'), nl,nl, halt.
-
-
-%%%%%%  3. DisplaySol: show the solution. Here M contains the literals that are true in the model:
-
-%displaySol(M):- nl, write(M), nl, nl, fail.
-displaySol(M) :- 
-      write('Finally, the team will be:'), 
-      nl, 
-      student(S), 
-      member(chosen(S), M), 
-      expertise(S,E), 
-      write('Student '),
-      write(S),
-      write(' with expertise '),
-      write(E), 
-      nl, 
-      fail.
-displaySol(_):- nl.
 
 %%%%%%% =======================================================================================
 
