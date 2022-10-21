@@ -109,8 +109,27 @@ satVariable( install(C) ):- city(C). %   install(C) means  "a gas station is ins
 
 %%%%%%  2. Clause generation for the SAT solver:
 
+assertMaxStations :-
+    maxStations(S),
+    findall(install(C), city(C), List),
+    List \= [],
+    atMost(S, List),
+    fail.
+assertMaxStations.
+
+assertMinimumOneStationBetweenCities :-
+    city(C1),
+    city(C2),
+    C1 \= C2,
+    road(C1, C2),
+    Lits = [install(C1), install(C2)],
+    atLeast(1, Lits),
+    fail.
+assertMinimumOneStationBetweenCities.
+
 writeClauses:- 
-    ...
+    assertMaxStations,
+    assertMinimumOneStationBetweenCities.
 writeClauses:- told, nl, write('writeClauses failed!'), nl,nl, halt.
 
 
@@ -118,7 +137,15 @@ writeClauses:- told, nl, write('writeClauses failed!'), nl,nl, halt.
 
 %displaySol(M):- nl, write(M), nl, nl, fail.
 displaySol(M):- 
-    ....
+    city(C),
+    member(install(C), M),
+    write('City '),
+    write(C),
+    findall(city(C1), (road(C, C1), road(C1, C), C1 \= C), R)
+    write(R),
+    nl,
+    fail.
+displaySol(_) :- nl.
 
 %%%%%%% =======================================================================================
 
