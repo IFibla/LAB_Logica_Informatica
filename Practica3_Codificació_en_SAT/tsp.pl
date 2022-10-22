@@ -37,8 +37,16 @@ adjacency(20,[12,6,18,7,16]).
 
 
 %Helpful prolog predicates:
-position(P):- numCities(N), between(0,N,P).
-city(I):-     adjacency(I,_).
+position(P) :- 
+      numCities(N), 
+      between(0,N,P).
+
+positionWithoutFirst(P) :- 
+      numCities(N), 
+      between(1,N,P).
+
+city(I) :-
+      adjacency(I,_).
 
 
 %%%%%%% =======================================================================================
@@ -55,21 +63,131 @@ city(I):-     adjacency(I,_).
 symbolicOutput(0).
 
 %%%%%%  1. SAT Variables:
-satVariable( visited(I,P) ):-  city(I), position(P). % visited(I,P) meaning "city I is visited in position P"
+satVariable( visited(I,P) ) :-
+      city(I), 
+      position(P). % visited(I,P) meaning "city I is visited in position P"
+
+satVariable( costAddedAtPosition(P) ) :-
+      position(P).
+      
+
 % Warning: more types of variables might be needed or convenient.
 
 
 %%%%%%  2. Clause generation for the SAT solver:
 
 writeClauses:- 
-    ...
+      assertStartAndEndAtSameCity,
+      assertEachCityOnce,
+      assertEachPositionOnce,
+      assertIsOnlyTakingAdjancies,
+      defineMovementImplications,
+      assertMaxCostRule,
+      true, !.
 writeClauses:- told, nl, write('writeClauses failed!'), nl,nl, halt.
 
+assertStartAndEndAtSameCity :-
+      numCities(N),
+      city(P),
+      (P = 1 ->
+            writeClause([visited(1, 0)]),
+            writeClause([visited(1, N)]);
+            writeClause([-visited(P, 0)]),
+            writeClause([-visited(P, N)])),
+      fail.
+assertStartAndEndAtSameCity. 
+
+assertEachCityOnce :-
+      city(C),
+      C \= 1,
+      findall(visited(C, P), positionWithoutFirst(P), L),
+      exactly(1, L),
+      fail.
+assertEachCityOnce.
+
+assertEachPositionOnce :-
+      position(P),
+      findall(visited(C, P), city(C), L),
+      exactly(1, L),
+      fail.
+assertEachPositionOnce.
+
+assertIsOnlyTakingAdjancies :-
+      city(C1),
+      city(C2),
+      C1 \= C2,
+      directionDependence(C1, C2),
+      fail.
+assertIsOnlyTakingAdjancies.
+
+directionDependence(C1, C2) :-
+      areTwoCitiesConnected(C1, C2),
+      not(areTwoCitiesConnected(C2, C1)),
+      addDirectionDependency(C2, C1),
+      !.
+directionDependence(C1, C2) :-
+      not(areTwoCitiesConnected(C1, C2)),
+      areTwoCitiesConnected(C2, C1),
+      addDirectionDependency(C1, C2),
+      !.
+directionDependence(C1, C2) :-
+      not(areTwoCitiesConnected(C1, C2)),
+      not(areTwoCitiesConnected(C2, C1)),
+      C1 < C2,
+      addDirectionDependency(C1, C2),
+      addDirectionDependency(C2, C1),
+      !.
+directionDependence(_, _) :- !.
+
+addDirectionDependency(C1, C2) :- 
+      position(P1),
+      numCities(N),
+      P1 < N,
+      P2 is P1 + 1,
+      writeClause([-visited(C1, P1), -visited(C2, P2)]),
+      fail.
+addDirectionDependency(_, _).
+
+defineMovementImplications :-
+      city(C1),
+      city(C2),
+      areTwoCitiesConnected(C1, C2),
+      checkTwoCitiesCardinality(C1, C2),
+      numCities(N),
+      position(P1),
+      P1 < N,
+      P2 is P1 + 1,
+      writeClause([-visited(C1, P1), -visited(C2, P2), costAddedAtPosition(P1)]),
+      fail.
+defineMovementImplications.
+
+areTwoCitiesConnected(C1, C2) :-
+      adjacency(C1, L),
+      member(C2, L).
+
+checkTwoCitiesCardinality(C1, C2) :-
+      R1 is C1 mod 2,
+      R2 is C2 mod 2,
+      R1 \= R2.
+
+assertMaxCostRule :-
+      findall(costAddedAtPosition(P), position(P), L),
+      maxCost(M),
+      atMost(M, L),
+      fail.
+assertMaxCostRule.
 
 %%%%%%  3. DisplaySol: show the solution. Here M contains the literals that are true in the model:
 
 %displaySol(M):- nl, write(M), nl, nl, fail.
-displaySol(M):- position(P), member(visited(City,P),M), write(City), write(' '), fail.
+displaySol(M) :- 
+      position(P), 
+      member(visited(City,P),M), 
+      write(City), 
+      write(' '),
+      (member(costAddedAtPosition(P),M) -> write('^') ; write('')),
+      nl,
+      fail.
 displaySol(_):- nl.
 
 %%%%%%% =======================================================================================
