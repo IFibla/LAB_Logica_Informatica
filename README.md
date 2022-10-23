@@ -76,3 +76,14 @@ Ahora, se introducen unos conceptos que se definen de manera idéntica en otras 
 5. Sea $F$ una fórmula. Demuestra que $F$ es una tautología si y solo si $-F$ es insatisfactible.
 
     En los apuntes, se define la propiedad $eval_I(-F)=1-eval_I(F)$, por lo tanto, como sabemos que $F$ es una tautología podemos afirmar que por todo valor del modelo $I$ la evaluación de $I$ en $F$ resultara cierta. Esto nos lleva a que, si negamos esta misma fórmula, el resultado que obtendremos sera $1-eval_I(F)$, y como el resultado de $eval_I(F)$ es siempre $1$, podemos afirmar que el resultado de $1-eval_I(F)$ siempre sera $0$, lo que equivale a decir que $-F$ es insatisfactible. 
+
+6. Sean $F$ y $G$ dos fórmulas. Demuestra que $F$ es consecuencia lógica de $G$ si y sólo si $G \wedge -F$ es insatisfactible.
+
+    $F$ es <b>consecuencia lógica</b> de $G$ si todo modelo de $G$ también es modelo de $F$, es decir, si para toda interpretación $I$ sobre $P$ tal que $I \models G$ se tiene que $I \models F$. Entonces, vamos a ver que $eval_I(G \wedge -F) = 0$:
+    
+    $eval_I(G \wedge -F) = min(eval_I(G), eval_I(-F)) = min(eval_I(G), 1-eval_I(F))$
+
+    Ademas sabemos que el resultado de $eval_I(G) = eval_I(F)$ por toda interpretación $I$ sobre $P$. Por lo tanto, supongamos que $P \rightarrow \{0,1\}$, veremos:
+
+    1. Si $I(p)= 1$ sabemos que $eval_I(F) = eval_I(G)$. Entonces si $eval_I(G \wedge -F) = min(eval_I(G), 1-eval_I(F)) = min(1, 0) = 0$
+    2. Si $I(p)= 0$ sabemos que $eval_I(F) = eval_I(G)$. Entonces si $eval_I(G \wedge -F) = min(eval_I(G), 1-eval_I(F)) = min(0, 1) = 0$
