@@ -87,3 +87,88 @@ Ahora, se introducen unos conceptos que se definen de manera idéntica en otras 
 
     1. Si $I(p)= 1$ sabemos que $eval_I(F) = eval_I(G)$. Entonces si $eval_I(G \wedge -F) = min(eval_I(G), 1-eval_I(F)) = min(1, 0) = 0$
     2. Si $I(p)= 0$ sabemos que $eval_I(F) = eval_I(G)$. Entonces si $eval_I(G \wedge -F) = min(eval_I(G), 1-eval_I(F)) = min(0, 1) = 0$
+
+7. Da un ejemplo de tres fórmulas $F_1$, $F_2$, y $F_3$ tales que $F_1 \wedge F_2 \wedge F_3$ sea insatisfactible y donde cualquier conjunció de todas ellas menos una sea satisfactible. Generalízalo a $n$ fórmulas.
+
+    Consideremos por ejemplo el vocabulario $P = \{p, q\}$, y las formulas $F_1 = p$, $F_2 = q$, $F_3 = \neg p \vee \neg q$.
+
+    La única interpretación $I$ que satisface tanto $F_1$ como $F_2$ cumple $I(p)=I(q)=1$, por lo que no satisface $F_3$, es decir la formula $F_1 \wedge F_2 \wedge F_3$ es insatisfactible. 
+
+    Sin embargo, vemos que cualquier conjunción de todas ellas menso una es satisfactible con las siguientes interpretaciones: 
+
+    $I_{12}(p)=1, I_{12}(q)=1$
+
+    $I_{13}(p)=1, I_{13}(q)=0$ 
+
+    $I_{23}(p)=0, I_{23}(q)=1$ 
+
+    Se puede ver fácilmente que $I_{12} \models F_1 \wedge F_2$, que $I_{13} \models F_1 \wedge F_3$, y que $I_{23} \models F_2 \wedge F_3$.
+
+8. Demuestra de la forma más sencilla que encuentres: $(\neg q \vee \neg r \vee p) \wedge (p \vee q) \wedge (r \vee p) \not\equiv (p \vee q)$.
+
+    Para demostrar que no son equivalentes encontraremos un ejemplo en el que no se cumpla la equivalencia. Tomaremos una interpretación $I$ de las fórmulas con los siguientes valores. $I(p) = 0$, $I(r) = 0$, $I(q) = 1$. Entonces si hacemos la evaluación de la interpretación $I$ en las dos formulas obtendremos:
+
+    $(0 \vee 1 \vee 0) \wedge (0 \vee 1) \wedge (0 \vee 0) = 0$. Por otra parte, $(0 \vee 1) = 1$. Se puede ver como $0 \not\equiv 1$, por lo que vemos que estas dos formulas no son logicamente equivalentes. 
+
+9. Demuestra de la forma más sencilla que encuentres: $(p \vee q) \wedge (r \vee p) \wedge (\neg q \vee \neg r \vee p) \equiv p$.
+
+    Lo demostraremos haciendo la tabla de verdad. 
+
+    |   p   |   q   |   r   | $(p \vee q) \wedge (r \vee p) \wedge (\neg q \vee \neg r \vee p)$ |  $p$  |
+    | :---: | :---: | :---: | :---------------------------------------------------------------: | :---: |
+    |   0   |   0   |   0   |                                 0                                 |   0   |
+    |   0   |   0   |   1   |                                 0                                 |   0   |
+    |   0   |   1   |   0   |                                 0                                 |   0   |
+    |   0   |   1   |   1   |                                 0                                 |   0   |
+    |   1   |   0   |   0   |                                 1                                 |   1   |
+    |   1   |   0   |   1   |                                 1                                 |   1   |
+    |   1   |   1   |   0   |                                 1                                 |   1   |
+    |   1   |   1   |   1   |                                 1                                 |   1   |
+
+10. Se define la longitud de una fórmula $F$, denotada $|F|$, como el número de símbolos, conectivas, paréntesis y símbolos de predicado en la fórmula $F$ vista como cadena de símbolos. Sea $F$ una fórmula que no contiene la connectiva $\neg$. Demuestra que si $p(F)$ es el número de símbolos de predicado en $F$ ( contando repeticiones ), entonces $|F| = 4 \cdot p(F) - 3$.
+
+    Si se quiere demostrar el concepto que se acaba de introducir, debemos hacer uso de inducción. Donde se define un caso base, una hipotesis de inducción y un paso inductivo. 
+
+    <b>Caso Base.</b> 
+    * $F = p \rightarrow |F| = 4 \cdot p(F) - 3 = (4 \cdot 1) - 3 = 1$ :white_check_mark:
+    * $F = (p \vee q) \rightarrow |F| = 4 \cdot p(F) - 3 = (4 \cdot 2) - 3 = 5$ :white_check_mark:
+
+    <b>Hipotesis de inducción.</b> Supondremos que $|F| > 1$ y que $\forall G \; \; |G| < |F|$ se cumple la propiedad.
+    
+    <b>Paso inductivo.</b> Supondremos que $F = (F_1 \vee F_2)$. Entonces veremos que 
+    
+    $|F| = 1 + |F_1| + 1 + |F_2| + 1$
+    
+    $|F| = 1 + (4 \cdot p(F_1) - 3) + 1 + (4 \cdot p(F_2) - 3) + 1$
+    
+    $|F| = 4 \cdot (p(F_1) + p(F_2)) - 3$ 
+    
+    $4 \cdot p(F) = 4 \cdot (p(F_1) + p(F_2))$ 
+
+    $p(F) = (p(F_1) + p(F_2))$ 
+
+    Lo que sabemos que es cierto, ya que $F$ és la fórmula que une $F_1$ i $F_2$ con un connectiva cualquiera. 
+
+11. Si $F \rightarrow G$ és tautología y $F$ es tautología, entonces ¿G es tautología? Demuéstralo.
+
+    Antes de nada definiremos que $F \rightarrow G \equiv \neg F \vee G$, por las propiedades de las connectivas logicas. Como sabemos que $F$ es una tautología podemos afirmar que por cualquier evaluación de la interpretación $I$ sobre $F$ el resultado sera satisfactible. Entonces,
+
+    $F$ es tautología si y solo si $\neg F$ es insatisfactible.
+
+    $\neg F \vee G$ es tautologia si y solo si por toda interpretación $I$ sobre $\neg F \vee G$ siempre es satisfactoria. Como sabemos que por cualquier interpretación possible $\neg F$ sera insatisfactible, podemos deducir que $G$ sera satisfactoria. Esto, al passar por cualquiera interpretación, nos deduce que $G$ también es una tautología.
+
+## Capítulo 3. Deducción en la lógica proposicional.
+
+### 3.1. Formas normales y cláusulas
+
+* <b>Fórmulas como conjuntos</b>. Sea $F$ una fórmula construida sólo mediante la conectiva $\wedge$ a partir de subfórmulas $F_1, F_2...F_n$. Por las propiedades de asociatividad, commutatividad e idempotencia de $\wedge$ podemos escribir la misma fórmula $F$ de las siguientes maneras, siendo siempre equivalentes ( porque no importan los paréntesis ( <b>Asociatividad</b> ), ni el orden de los elementos ( <b>Conmutatividad</b> ), ni los elementos repetidos ( <b>Idempotencia</b> )). Destacar que lo mismo pasa con la conectiva $\vee$. 
+  * $(F_1 \wedge (F_2 \wedge ( ... \wedge F_3 ) ) )$
+  * $(F_1 \wedge F_2 \wedge F_3 )$
+  * $\{F_1,...,F_n\}$
+* <b>Literal</b>. Un literal es un símbolo de predicado $p$ ( literal positivo ) o un símbolo de predicado negado $\neg p$ ( literal negativo ).
+* <b>Conjuctive Normal Form</b>. Una fórmula está en <b>CNF</b> si es una conjunción de disyunciones de literales, és decir, si es de la forma $(I_{1,1} \vee ... \vee I_{1,k_1} \wedge ... \wedge (I_{n,1} \vee ... \vee I_{n, k_n}))$ donde cada $I_{i,j}$ es un literal.
+* <b>Disjuntive Normal Form</b>. Una fórmula está en <b>DNF</b> si es una disyunción de conjunciones de literales, es decir, si es de la forma $(I_{1,1} \wedge ... \wedge I_{1,k_1} \vee ... \vee (I_{n,1} \wedge ... \wedge I_{n, k_n}))$ donde cada $I_{i,j}$ es un literal.
+* <b>Cláusula</b>. Una cláusula es una disyunción de literales, es decir, una fórmula de la forma $l_1 \vee ... \vee l_n$ donde cada $l_i$ es un literal, o, equivalentemente, una fórmula.
+* <b>Conjunto de cláusulas</b>. Una fórmula en <b>CNF</b> es pues una conjunción de cláusulas que puede verse como un conjunto de cláusulas.
+* <b>Cláusula vacía</b>. Es la disyunción de cero literales.
+* <b>Cláusula de Horn</b>. Cláusula (disyunción de literales) con, como máximo, un literal positivo.
