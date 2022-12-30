@@ -38,6 +38,7 @@ writeClauses:-
     eachTeamEachRoundOneMatch,
     eachOpponentExactlyOnce,
     homesAndAways,
+    writeDoublesClause,
     noDoubles,                 % to be done
     atmostOneTVMatchPerRound,  % to be done
     sixOrSevenHomes,           % to be done
@@ -63,9 +64,16 @@ eachOpponentExactlyOnce.
 
 homesAndAways:- 
     team(S), otherTeam(S,T), round(R),
-    writeClause([ -match(S,T,R),  home(S,R) ]), 
+    writeClause([ -match(S,T,R),  home(S,R) ]), p
     writeClause([ -match(S,T,R), -home(T,R) ]), fail.
 homesAndAways.
+
+writeDoublesClause :-
+    team(S), round(R), R1 is R + 1, round(R1),
+    writeClause([double(S, R1), home(S, R), home(S, R1)]),
+    writeClause([double(S, R1), -home(S, R), -home(S, R1)]),
+    fail.
+writeDoublesClause.
 
 noDoubles:- 
     noDoubles(ND), 
