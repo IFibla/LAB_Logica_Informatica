@@ -77,49 +77,82 @@ satVariable( double(S,R)  ):- team(S),          round(R).   %  "team S has a dou
 
 writeClauses(MaxCost):-
     eachTeamEachRoundExactlyOneMatch,
-    noDoublesCertainRounds,
+    eachPairOfTeamsExactlyOneMatch,
     noHomeOnCertainRound,
-    oneTvMatchOnEachRound,
+    homesAndAways,
+    writeDoublesClause,
+    noDoublesOnCertainRound,
     noTriples,
+    tvMatchOnEachRound,
     maxCost(MaxCost),
     true,!.
 writeClauses(_):- told, nl, write('writeClauses failed!'), nl,nl, halt.
 
-eachTeamEachRoundExactlyOneMatch:- team(T), round(R),
+eachTeamEachRoundExactlyOneMatch:- 
+    team(T), 
+    round(R),
     findall( match(S,T,R), difTeams(S,T), LitsH ),
-    findall( match(T,S,R), difTeams(S,T), LitsA ), append(LitsH,LitsA,Lits), exactly(1,Lits), fail.
+    findall( match(T,S,R), difTeams(S,T), LitsA ), 
+    append(LitsH,LitsA,Lits),
+    exactly(1,Lits), 
+    fail.
 eachTeamEachRoundExactlyOneMatch.
 
-noDoublesCertainRounds:-
-    noDoubles(ND), 
-    findall(double(S,R), (team(S), member(R,ND)), Lits), 
-    exactly(0,Lits),
+eachPairOfTeamsExactlyOneMatch:-
+    team(T1),
+    difTeams(T1, T2),
+    findall(match(T1, T2, R), round(R), LitsH),
+    findall(match(T2, T1, R), round(R), LitsA),
+    append(LitsH,LitsA,Lits),
+    exactly(1,Lits), 
     fail.
-noDoubles.
+eachPairOfTeamsExactlyOneMatch.
 
 noHomeOnCertainRound:-
     team(T),
     notHome(T, NH),
-    findall(home(T, R), (round(R), member(R, NH)), Lits),
+    findall(match(T, T2, R), (member(R, NH), difTeams(T, T2)), Lits),
     exactly(0, Lits),
-    fail.
+    fail.    
 noHomeOnCertainRound.
 
-oneTvMatchOnEachRound:-
-    round(R),  
-    findall(match(S,T,R),tvMatch(S,T),Lits),  
-    writeClause(Lits), 
+homesAndAways:- 
+    team(S), difTeams(S,T), round(R),
+    writeClause([ -match(S,T,R),  home(S,R) ]),
+    writeClause([ -match(S,T,R), -home(T,R) ]), 
     fail.
-oneTvMatchOnEachRound
+homesAndAways.
+
+writeDoublesClause :-
+    team(S), round(R), R1 is R + 1, round(R1),
+    writeClause([double(S, R1), home(S, R), home(S, R1)]),
+    writeClause([double(S, R1), -home(S, R), -home(S, R1)]),
+    fail.
+writeDoublesClause.    
+
+noDoublesOnCertainRound:-
+    noDoubles(ND),
+    findall(double(T, R), (team(T), member(R, ND)), Lits),
+    exactly(0, Lits),
+    fail.
+noDoublesOnCertainRound.
 
 noTriples:-
-    team(T),
     round(R0),
-    R1 \= R0 + 1,
+    R1 is R0 + 1,
     round(R1),
+    team(T),
     writeClause([-double(T, R0), -double(T, R1)]),
     fail.
 noTriples.
+
+tvMatchOnEachRound:-
+    round(R),
+    tvTeams(TV),
+    findall(match(T0, T1, R), (member(T0, TV), member(T1, TV), difTeams(T0, T1)), Lits),
+    atLeast(1, Lits),
+    fail.
+tvMatchOnEachRound.
 
 maxCost(infinite):-!.
 maxCost(Max):- team(T), findall(double(T,R), round(R), Lits ), atMost(Max,Lits), fail.
