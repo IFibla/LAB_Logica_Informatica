@@ -20,9 +20,9 @@ maxHour(168).
 %% format:
 %% task( taskID, Duration, ListOFResourcesUsed ).
 %% resourceUnits( resourceID, NumUnitsAvailable ).
- :-include(easy152).       % simple input example file. 
-%:-include(hardMaybe97).   % for this example there is a solution of cost 97.  We think it is optimal.
-%:-include(hardMaybe147).  % for this example there is a solution of cost 147. We think it is optimal.
+% :-include(easy152).       % simple input example file. 
+ :-include(hardMaybe97).   % for this example there is a solution of cost 97.  We think it is optimal.
+% :-include(hardMaybe147).  % for this example there is a solution of cost 147. We think it is optimal.
 
 %%%%%% Some helpful definitions to make the code cleaner:
 
@@ -32,13 +32,13 @@ usesResource(T,R):-    task(T,_,L), member(R,L).
 
 %%%%%%
 
-symbolicOutput(0).  % set to 1 to see symbolic output only; 0 otherwise.
+symbolicOutput(0).  % set to 1 to see symbolic output only; 0 otherwise.    
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1.- Declare SAT variables to be used
 satVariable( start(T,H) ):- task(T), integer(H).   % "task T starts at hour H"     (MANDATORY)
+satVariable( resourceUsed(T, R, H) ):- task(T, _, RU), member(R, RU), integer(H). % "task T is using resource R at hour H"
 % more variables will be needed....
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2. This predicate writeClauses(MaxCost) generates the clauses that guarantee that
@@ -47,10 +47,37 @@ satVariable( start(T,H) ):- task(T), integer(H).   % "task T starts at hour H"  
 writeClauses(infinite):- !, maxHour(M), writeClauses(M),!.
 writeClauses(MaxHours):-
     eachTaskStartsOnce(MaxHours),
-    ...
+    addResourceDuringTaskTime(MaxHours),
+    doNotExceedResources(MaxHours),
     true,!.
 writeClauses(_):- told, nl, write('writeClauses failed!'), nl,nl, halt.
 
+eachTaskStartsOnce(MaxHours):-
+    task(T, D, _),
+    LastTime is MaxHours - D + 1,
+    findall(start(T, H), (between(1, LastTime, H)), Lits),
+    exactly(1, Lits),
+    fail.
+eachTaskStartsOnce(_).
+
+addResourceDuringTaskTime(MaxHours):-
+    task(T, D, RU),
+    member(R, RU),
+    LastTime is MaxHours - D + 1,
+    between(1, LastTime, InitTime),
+    FinishTime is InitTime + D - 1,
+    between(InitTime, FinishTime, InterTime),
+    writeClause([-start(T, InitTime), resourceUsed(T, R, InterTime)]),
+    fail.
+addResourceDuringTaskTime(_).
+
+doNotExceedResources(MaxHours):-
+    resourceUnits(R, U),
+    between(1, MaxHours, TIME),
+    findall(resourceUsed(T, R, TIME), (task(T, _, RU), member(R, RU)), Lits),
+    atMost(U, Lits),
+    fail.
+doNotExceedResources(_).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 3. This predicate displays a given solution M:
