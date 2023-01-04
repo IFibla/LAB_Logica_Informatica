@@ -8,7 +8,7 @@
 % Can you solve the problem for all 22 cities?
 
 main:- statistics(walltime,_),
-       N=12,  %try higher numbers here...
+       N=22,  %try higher numbers here...
        retractall(bestRouteSoFar(_,_)),  assertz(bestRouteSoFar(100000,[])),  % "infinite" distance
        findall(I,between(2,N,I),Cities), tsp( Cities, 0, [1] ).
 main:- bestRouteSoFar(Km,ReverseRoute), reverse( ReverseRoute, Route ), nl,
@@ -20,16 +20,18 @@ main:- bestRouteSoFar(Km,ReverseRoute), reverse( ReverseRoute, Route ), nl,
 tsp( [], AccumulatedKm, RouteSoFar ):- storeRouteIfBetter(AccumulatedKm,RouteSoFar), fail.
 
 %2
-tsp(  _, AccumulatedKm, _          ):- bestRouteSoFar(Km,_), AccumulatedKm >= Km, !, fail.
-%alternative:
-%tsp( Cities, AccumulatedKm, _ ):- bestRouteSoFar(Km,_),
-%    lowerBoundOfRemainingCities( Cities, LBound ),   %implement this (efficiently)!
-%    AccumulatedKm+LBound >= Km, !, fail.
+% tsp(  _, AccumulatedKm, _          ):- bestRouteSoFar(Km,_), AccumulatedKm >= Km, !, fail.
+% alternative:
+tsp( Cities, AccumulatedKm, _ ):- 
+	bestRouteSoFar(Km,_),
+    lowerBoundOfRemainingCities(Cities, LBound),   %implement this (efficiently)!
+    AccumulatedKm+LBound >= Km, 
+	!, fail.
 
 %3
 tsp( Cities, AccumulatedKm, [ CurrentCity | RouteSoFar ] ):-
-    select( City, Cities, RemainingCities ),  % select next city to visit
-%   myselect( CurrentCity, City, Cities, RemainingCities ),  % implement this
+	orderCitiesbyDistance(CurrentCity,Cities,Cities1),
+    select( City, Cities1, RemainingCities ),  % select next city to visit
     distance( CurrentCity, City, Km ),  AccumulatedKm1 is AccumulatedKm+Km,
     tsp( RemainingCities, AccumulatedKm1, [ City, CurrentCity | RouteSoFar ] ).
 
@@ -39,6 +41,40 @@ storeRouteIfBetter( Km, Route ):-  bestRouteSoFar( BestKm, _ ), Km < BestKm,
     retractall(bestRouteSoFar(_,_)), assertz(bestRouteSoFar(Km,Route)),  %this asserts or retracts info from the database.
     !.
 
+orderCitiesbyDistance(CurrC, Cities,Cities1):- 
+    findall( [D,C], (member(C,Cities),distance(CurrC,C,D)), L ),  % L es la lista [[Dist1,C1],...,[Distn,Cn]],
+    sort(L,L1),                                                   %L1 es ls misma lista de pares, pero ordenada de menor a mayor distancia
+    findall( C, member([_,C], L1), Cities1 ),!.                   %Cities1 es la lista de las segundas componentes de los pares de L1
+
+lowerBoundOfRemainingCities([], 0).
+lowerBoundOfRemainingCities([C|Cities], Km) :-
+	lowerBoundOfRemainingCities(Cities,Km1), 
+	mindist(C,D), 
+	Km is Km1+D,
+	!.
+
+mindist(1,20).
+mindist(2,18).
+mindist(3,42).
+mindist(4,40).
+mindist(5,17).
+mindist(6,38).
+mindist(7,26).
+mindist(8,47).
+mindist(9,17).
+mindist(10,33).
+mindist(11,19).
+mindist(12,17).
+mindist(13,17).
+mindist(14,35).
+mindist(15,28).
+mindist(16,34).
+mindist(17,28).
+mindist(18,35).
+mindist(19,28).
+mindist(20,20).
+mindist(21,19).
+mindist(22,20).
 
 %  Number of points N is   22
 distance(A,B,Km):-
