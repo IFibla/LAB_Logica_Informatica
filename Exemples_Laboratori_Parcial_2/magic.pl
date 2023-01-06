@@ -19,14 +19,20 @@ main:- p(5), nl, halt.
 p(N):-
     NSquare is N*N,
     length( Vars, NSquare ),
-    ...
+    Vars ins 1..NSquare,
+    all_distinct(Vars),
     squareByRows(N,Vars,SquareByRows),
     transpose( SquareByRows, SquareByCols ),  % transpose already exists: no need to implement it
     Sum is (N + N*N*N) // 2,
     constraintsSum( Sum, SquareByRows),
-    ...
+    constraintsSum( Sum, SquareByCols),
+    label(Vars),
     writeSquare(SquareByRows),nl,!.
 
+constraintsSum(_, []).
+constraintsSum(SumVal, [X|Sum]) :- 
+	sum(X, #=,SumVal),
+	constraintsSum(SumVal,Sum).
 
 squareByRows(_,[],[]):-!.
 squareByRows(N,Vars,[Row|SquareByRows]):- append(Row,Vars1,Vars), length(Row,N), squareByRows(N,Vars1,SquareByRows),!.
@@ -37,3 +43,4 @@ writeSquare(_).
 write4(N):- N<10,   write('   '), write(N),!.
 write4(N):- N<100,  write('  ' ), write(N),!.
 write4(N):-         write(' '  ), write(N),!.
+
