@@ -126,16 +126,16 @@ eachCourseMaxOncePerDay.
 relateVarsCDHwithCD:- course(C), day(D), findall( cdh(C,D,H), hour(H), Lits ), expressOr(cd(C,D),Lits), fail.
 relateVarsCDHwithCD.
 
-eachCourseRightNumberOfDays:- course(C), courseHours(C, Hs), findall( cd(C,D), day(D), Lits ), exactly(Lits, Hs), fail. 
+eachCourseRightNumberOfDays:- course(C), courseHours(C, Hs), findall( cd(C,D), day(D), Lits ), exactly(Hs, Lits), fail. 
 eachCourseRightNumberOfDays.
 
 noOverlapCoursesSameYear:- day(D), hour(H), year(Y), findall( cdh(C,D,H), courseYear(C, Y), Lits ), atMost(1, Lits), fail.
 noOverlapCoursesSameYear.
 
-noOverlapProfs:- day(D), hour(H), professor(P), courseProfessors(C1, P1), member(P, P1), courseProfessors(C2, P2), member(P, P2), writeClause([ -cdh(C1,D,H), -cdh(C2,D,H), -cp(C1,P), -cp(C2,P) ]), fail. 
+noOverlapProfs:- day(D), hour(H), professor(P), courseProfessors(C1, P1), member(P, P1), courseProfessors(C2, P2), member(P, P2), C1 \= C2, writeClause([ -cdh(C1,D,H), -cdh(C2,D,H), -cp(C1,P), -cp(C2,P) ]), fail. 
 noOverlapProfs.
 
-noOverlapRooms:- day(D), hour(H), room(R), courseRooms(C1, R1), member(R, R1), courseRooms(C2, R2), member(R, R2), writeClause([ -cdh(C1,D,H), -cdh(C2,D,H), -cr(C1,R), -cp(C2,R) ]), fail. 
+noOverlapRooms:- day(D), hour(H), room(R), courseRooms(C1, R1), member(R, R1), courseRooms(C2, R2), member(R, R2), C1 \= C2, writeClause([ -cdh(C1,D,H), -cdh(C2,D,H), -cr(C1,R), -cp(C2,R) ]), fail. 
 noOverlapRooms.
 
 relateVarsCPwithUsedProf:- professor(P), findall( cp(C,P), course(C), Lits ), expressOr(usedProf(P),Lits), fail.
