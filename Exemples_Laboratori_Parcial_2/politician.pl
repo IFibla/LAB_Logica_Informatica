@@ -25,15 +25,18 @@ road1(A-B,K):- road(A-B,K).
 road1(B-A,K):- road(A-B,K).
 
 
-politician(N,MaxKm,Trip):-     path(...).
+politician(N,MaxKm,Trip):- path(N, MaxKm, 1, [], Trip).
 
 % path( NumCitiesRemainingToBeVisited, RemainingKm, CurrentCity, CitiesAlreadyVisited, Path )
 
-path( 0, RemainingKm, 1, _, [] ):- ..., !.
+path( 0, RemainingKm, 1, _, [] ):- RemainingKm >= 0, !.
 path( NumCitiesRemainingToBeVisited, RemainingKm, CurrentCity, CitiesAlreadyVisited, [CurrentCity1|Path] ):-
+    RemainingKm > 0,
     road1( CurrentCity-CurrentCity1, K ),
-    ...
-    path( ... ).
+    RemainingKm1 is RemainingKm - K,
+    \+ member(CurrentCity1, CitiesAlreadyVisited),
+    NumCitiesRemainingToBeVisited1 is NumCitiesRemainingToBeVisited - 1,
+    path( NumCitiesRemainingToBeVisited1, RemainingKm1, CurrentCity1, [CurrentCity1|CitiesAlreadyVisited], Path ).
 
 
 %% Examples: this main writes the six trips below (in some order):
@@ -43,12 +46,9 @@ main:- politician(6,120,Trip),   write([1|Trip]), nl, fail.
 main:- halt.
 
 %% [1,3,4,8,6,1]
-%% [1,3,4,2,6,1]
+%% [1,3,4,2,6,1] -
 %% [1,6,8,4,3,1]
-%% [1,6,2,4,3,1]
-%% [1,3,2,5,8,6,1]
-%% [1,6,8,5,2,3,1]
-
-
-
+%% [1,6,2,4,3,1] -
+%% [1,3,2,5,8,6,1] -
+%% [1,6,8,5,2,3,1] -
 
