@@ -14,7 +14,7 @@
 %%   22  20   7  10   6
 %%   23  21  12   5   4
 
-main:- p(5), nl, halt.
+main:- p(4), nl, halt.
 
 p(N):-
     NSquare is N*N,
