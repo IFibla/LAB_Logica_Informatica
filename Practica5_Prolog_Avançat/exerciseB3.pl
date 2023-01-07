@@ -10,8 +10,10 @@ sumList([], 0).
 sumList([X|Res], Sum) :- sumList(Res, Y), Sum is X + Y.
 
 main :-
-    EstadoInicial = [[1, 3, 5, 7], [], 0],
-    EstadoFinal = [[], [1, 3, 5, 7], 1],
+    Personas = [6,5,4,3,2,1],
+    sort(Personas, PS),
+    EstadoInicial = [PS, [], 0],
+    EstadoFinal = [[], PS, 1],
     nat(CosteMax),
     camino(CosteMax, EstadoInicial, EstadoFinal, [EstadoInicial], Camino),
     reverse(Camino, Camino1),
